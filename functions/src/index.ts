@@ -1,7 +1,9 @@
+/* eslint-disable quote-props */
 /* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 import * as functions from "firebase-functions";
 import {getDistance} from "geolib";
+import fetch from "node-fetch";
 
 // import {getAllUsers} from "./firebase";
 import * as admin from "firebase-admin";
@@ -44,5 +46,23 @@ export const onLocationAdded = functions.database
           console.log("Irrelevant: ", userData.user.firstname);
         }
       });
+
+      allRelevantPushTokens.forEach((token: string) => {
+        fetch("https://exp.host/--/api/v2/push/send/", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Accept-Encoding": "gzip, deflate",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            to: token,
+            data: {},
+            title: "Someone is in your range!",
+            body: `${locationData.firstname} is nearby!`,
+          }),
+        });
+      });
     });
+
 
