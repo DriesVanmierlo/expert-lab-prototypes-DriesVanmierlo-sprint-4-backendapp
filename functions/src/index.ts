@@ -1,5 +1,8 @@
+/* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 import * as functions from "firebase-functions";
+import {getDistance} from "geolib";
+
 // import {getAllUsers} from "./firebase";
 import * as admin from "firebase-admin";
 admin.initializeApp(functions.config().firebase);
@@ -23,13 +26,23 @@ export const onLocationAdded = functions.database
 
       // eslint-disable-next-line prefer-const
       let allUsers: admin.firestore.DocumentData[] = [];
+      // eslint-disable-next-line prefer-const
+      let allRelevantPushTokens: string[] = [];
 
       const db = admin.firestore();
       const query = await db.collection("users").get();
+
       query.forEach((doc) => {
-        console.log("USER DATA: ", doc.data());
         allUsers.push(doc.data());
+        const userData = doc.data();
+        const distance = getDistance({latitude: locationData.latitude, longitude: locationData.longitude}, {latitude: userData.user.location.latitude, longitude: userData.user.location.longitude});
+        console.log("Distance of ", userData.user.firstname, ": ", distance);
+        if (distance <= 750) {
+          console.log("Relevant: ", userData.user.firstname);
+          allRelevantPushTokens.push(userData.user.pushToken);
+        } else {
+          console.log("Irrelevant: ", userData.user.firstname);
+        }
       });
-      console.log("ALL USERS: ", allUsers);
     });
 
