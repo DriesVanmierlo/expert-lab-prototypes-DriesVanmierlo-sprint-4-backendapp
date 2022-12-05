@@ -42,7 +42,9 @@ export const onLocationAdded = functions.database
         const distance = getDistance({latitude: locationData.latitude, longitude: locationData.longitude}, {latitude: userData.user.location.latitude, longitude: userData.user.location.longitude});
         console.log("Distance of ", userData.user.firstname, ": ", distance);
         const timeDifference: number = locationData.timestamp - userData.user.location.timestamp;
-        if (distance <= 750) {
+        if (uid == userData.user.uid) {
+          console.log("Irrelevant: ", userData.user.firstname);
+        } else if (distance <= 750) {
           console.log("Relevant: ", userData.user.firstname);
           allRelevantPushTokens.push(userData.user.pushToken);
         } else if (distance <= 25000 && timeDifference > 1200) {
